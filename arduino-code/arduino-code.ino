@@ -1,3 +1,5 @@
+#include <HashMap.h>
+
 int led_flash[] = {};
 int cor_button[] = {};
 
@@ -19,22 +21,22 @@ int flash_rate = 0;
 int correct = 0;
 int wrong = 0;
 
-typedef struct {
-  int led;
-  int button;
-} led_button_struct;
-
-const led_button_struct led_button[] {
-  {led_one, button_one},
-  {led_two, button_two},
-  {led_three, button_three},
-  {led_four, button_four}
-};
+const byte HASH_SIZE = 4;
+HashType<int, int> hashRawArray[HASH_SIZE];
+HashMap<int, int> led_button = HashMap<int, int>(\hashRawArray, HASH_SIZE);
 
 void setup() {
 
-  for(int i = 0; i < sizeof(led_button)/sizeof(led_button_struct); ++i) {
-    Serial.println(led_button[i].led);
-  }
+  led_button[0](led_one, button_one);
+  led_button[1](led_two, button_two);
+  led_button[2](led_three, button_three);
+  led_button[3](led_four, button_four);
 
+  Serial.begin(9600);
+  Serial.println(led_button.getValueOf(led_two));
+  
+  led_button.debug();
 }
+
+
+
