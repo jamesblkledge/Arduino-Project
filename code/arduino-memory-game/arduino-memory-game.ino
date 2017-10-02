@@ -1,44 +1,51 @@
+/*
+
+                  _       _               __  __                                    _____
+    /\           | |     (_)             |  \/  |                                  / ____|
+   /  \   _ __ __| |_   _ _ _ __   ___   | \  / | ___ _ __ ___   ___  _ __ _   _  | |  __  __ _ _ __ ___   ___
+  / /\ \ | '__/ _` | | | | | '_ \ / _ \  | |\/| |/ _ \ '_ ` _ \ / _ \| '__| | | | | | |_ |/ _` | '_ ` _ \ / _ \
+ / ____ \| | | (_| | |_| | | | | | (_) | | |  | |  __/ | | | | | (_) | |  | |_| | | |__| | (_| | | | | | |  __/
+/_/    \_\_|  \__,_|\__,_|_|_| |_|\___/  |_|  |_|\___|_| |_| |_|\___/|_|   \__, |  \_____|\__,_|_| |_| |_|\___|
+                                                                           |___/|
+
+
+                                       CODE WRITTEN BY JAMES BLACKLEDGE.
+                                   ADA, NATIONAL COLLEGE FOR DIGITAL SKILLS.
+
+
+*/
+
 int led_list[4];
 int button_list[4];
 int check_list[4];
 
-int flash_rate = 800;
+int flash_rate = 750;
 
-int button_count, cycle_count, flash_count, correct_count = 0;
-int state_one, last_one, state_two, last_two, state_three, last_three, state_four, last_four = 0;
+int button_count = 0;
+int cycle_count = 0;
+int flash_count = 0;
+int correct_count = 0;
 
 const size_t size_of_led = sizeof(led_list) / sizeof(led_list[0]);
 const size_t size_of_button = sizeof(button_list) / sizeof(button_list[0]);
 
-const int led_one = 2; const int button_one = 8;
-const int led_two = 3; const int button_two = 9;
-const int led_three = 4; const int button_three = 10;
-const int led_four = 5; const int button_four = 11;
-
 const int led_button[4][2]{
 
-  {led_one, button_one},
-  {led_two, button_two},
-  {led_three, button_three},
-  {led_four, button_four}
+  {2, 8}, {3, 9}, {4, 10}, {5, 11}
 
 };
 
 int button_state_map[4][3]{
 
-  {button_one, state_one, last_one},
-  {button_two, state_two, last_two},
-  {button_three, state_three, last_three},
-  {button_four, state_four, last_four}
+  {8, 0, 0}, {9, 0, 0}, {10, 0, 0}, {11, 0, 0}
 
 };
 
 int process_button(){
 
-  button_state_map[0][1] = digitalRead(button_state_map[0][0]);
-  button_state_map[1][1] = digitalRead(button_state_map[1][0]);
-  button_state_map[2][1] = digitalRead(button_state_map[2][0]);
-  button_state_map[3][1] = digitalRead(button_state_map[3][0]);
+  for (int i = 0; i < size_of_button; i++){
+    button_state_map[i][1] = digitalRead(button_state_map[i][0]);
+  }
 
   if (button_state_map[0][1] != button_state_map[0][2]){
     if (button_state_map[0][1] == HIGH){
@@ -79,7 +86,6 @@ int find_index_led(const int list[2][2], int size, int value){
   int index = 0;
 
   while (index < size && list[index][0] != value) index++;
-
   return (index == size ? -1 : index);
 
 }
@@ -89,9 +95,9 @@ int shuffle_led_list(){
   for (size_t i = 0; i < size_of_led; i++){
     size_t j = random(0, size_of_led);
 
-    int r = led_list[i];
+    int k = led_list[i];
     led_list[i] = led_list[j];
-    led_list[j] = r;
+    led_list[j] = k;
 
     randomSeed(analogRead(0));
   }
@@ -99,7 +105,7 @@ int shuffle_led_list(){
 }
 
 void setup() {
-
+  
   Serial.begin(115200);
 
   for (int i = 0; i < size_of_led; i++){
@@ -139,30 +145,37 @@ void loop() {
 
   while (button_count == size_of_button){
 
-    for (int i = 0; i < size_of_button; i++){
-      if (button_list[i] == check_list[i]){
+    for (int k = 0; k < size_of_button; k++){
+      if (button_list[k] == check_list[k]){
         cycle_count++;
       }
     }
 
     if (cycle_count < size_of_button){
+      for (int l = 0; l < 3; l++){
+        digitalWrite(led_button[3][0], HIGH);
+        delay(200);
+        digitalWrite(led_button[3][0], LOW);
+        delay(200);
+      }
+
       Serial.println(correct_count); exit(0);
     }
 
     correct_count++;
 
-    for (int j = 0; j < size_of_led; j++){
-      digitalWrite(led_button[j][0], HIGH);
+    for (int m = 0; m < size_of_led; m++){
+      digitalWrite(led_button[m][0], HIGH);
     }
 
     delay(1000);
 
-    for (int k = 0; k < size_of_led; k++){
-      digitalWrite(led_button[k][0], LOW);
+    for (int n = 0; n < size_of_led; n++){
+      digitalWrite(led_button[n][0], LOW);
     }
 
     if (flash_rate > 150 && (correct_count & 1) != 0){
-      flash_rate -= 100;
+      flash_rate -= 75;
     }
 
     button_count -= button_count; cycle_count -= cycle_count; flash_count -= flash_count;
