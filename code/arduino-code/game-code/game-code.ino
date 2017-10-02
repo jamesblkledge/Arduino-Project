@@ -2,7 +2,7 @@ int led_list[4];
 int button_list[4];
 int check_list[4];
 
-int flash_rate = 700;
+int flash_rate = 800;
 
 int button_count, cycle_count, flash_count, correct_count = 0;
 int state_one, last_one, state_two, last_two, state_three, last_three, state_four, last_four = 0;
@@ -20,7 +20,7 @@ const int led_button[4][2]{
   {led_one, button_one},
   {led_two, button_two},
   {led_three, button_three},
-  {led_four, button_four},
+  {led_four, button_four}
 
 };
 
@@ -29,19 +29,17 @@ int button_state_map[4][3]{
   {button_one, state_one, last_one},
   {button_two, state_two, last_two},
   {button_three, state_three, last_three},
-  {button_four, state_four, last_four},
+  {button_four, state_four, last_four}
 
 };
 
 int process_button(){
 
-  Serial.println(button_count);
-  
   button_state_map[0][1] = digitalRead(button_state_map[0][0]);
   button_state_map[1][1] = digitalRead(button_state_map[1][0]);
   button_state_map[2][1] = digitalRead(button_state_map[2][0]);
   button_state_map[3][1] = digitalRead(button_state_map[3][0]);
-  
+
   if (button_state_map[0][1] != button_state_map[0][2]){
     if (button_state_map[0][1] == HIGH){
       check_list[button_count] = button_state_map[0][0]; button_count++;
@@ -73,7 +71,7 @@ int process_button(){
     delay(50);
   }
   button_state_map[3][2] = button_state_map[3][1];
-  
+
 }
 
 int find_index_led(const int list[2][2], int size, int value){
@@ -81,7 +79,7 @@ int find_index_led(const int list[2][2], int size, int value){
   int index = 0;
 
   while (index < size && list[index][0] != value) index++;
-  
+
   return (index == size ? -1 : index);
 
 }
@@ -114,19 +112,19 @@ void setup() {
 }
 
 void loop() {
-  
+
   while (flash_count == 0){ 
-  
+
     shuffle_led_list();
-  
+
     for (int i = 0; i < size_of_button; i++){
       button_list[i] = led_button[find_index_led(led_button, size_of_led, led_list[i])][1];
-  
+
       pinMode(led_list[i], OUTPUT);
     }
-  
+
     delay(1000);
-  
+
     for (int j = 0; j < size_of_led; j++){
       digitalWrite(led_list[j], HIGH);
       delay(flash_rate);
@@ -138,7 +136,7 @@ void loop() {
   }
 
   process_button();
-  
+
   while (button_count == size_of_button){
 
     for (int i = 0; i < size_of_button; i++){
@@ -146,29 +144,29 @@ void loop() {
         cycle_count++;
       }
     }
-    
+
     if (cycle_count < size_of_button){
       Serial.println(correct_count); exit(0);
     }
-    
+
     correct_count++;
-    
+
     for (int j = 0; j < size_of_led; j++){
       digitalWrite(led_button[j][0], HIGH);
     }
-    
+
     delay(1000);
-    
+
     for (int k = 0; k < size_of_led; k++){
       digitalWrite(led_button[k][0], LOW);
     }
-    
-    if (flash_rate > 250 && (correct_count & 1) != 0){
-      flash_rate -= 50;
+
+    if (flash_rate > 150 && (correct_count & 1) != 0){
+      flash_rate -= 100;
     }
-    
+
     button_count -= button_count; cycle_count -= cycle_count; flash_count -= flash_count;
-  
+
   }
-  
+
 }
