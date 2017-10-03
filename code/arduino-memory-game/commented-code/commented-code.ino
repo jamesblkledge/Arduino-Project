@@ -124,13 +124,12 @@ void setup() {
 
   // INITIALISE SERIAL BAUD RATE //
 
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // POPULATE 'led_list' AND 'button_list' WITH PIN NUMBERS. SET ALL BUTTON PINS AS AN INPUT //
 
   for (int i = 0; i < size_of_led; i++){
-    size_t n = random(0, size_of_led);
-    led_list[i] = led_button[n][0];
+    led_list[i] = led_button[i][0];
 
     button_list[i] = led_button[i][1];
     pinMode(button_list[i], INPUT);
@@ -194,7 +193,8 @@ void loop() {
         delay(200);
       }
 
-      Serial.println(correct_count); exit(0);
+      Serial.print("\nFINAL SCORE >> " + String(correct_count)); delay(1000);
+      exit(0);
     }
 
     correct_count++;
@@ -205,7 +205,7 @@ void loop() {
       digitalWrite(led_button[m][0], HIGH);
     }
 
-    delay(1000);
+    Serial.print("CURRENT SCORE >> " + String(correct_count) + "\n"); delay(1000);
 
     for (int n = 0; n < size_of_led; n++){
       digitalWrite(led_button[n][0], LOW);
@@ -213,8 +213,10 @@ void loop() {
 
     // DECREMENT 'flash_rate' BY 75 EVERY SECOND CYCLE WHILE 'flash_rate' > 150 // 
 
-    if (flash_rate > 150 && (correct_count & 1) != 0){
-      flash_rate -= 75;
+    if (correct_count > 1){
+      if (flash_rate > 150 && (correct_count & 1) != 0){
+        flash_rate -= 75;
+      }
     }
 
     // RESET KEY VARIABLES //
