@@ -129,7 +129,8 @@ void setup() {
   // POPULATE 'led_list' AND 'button_list' WITH PIN NUMBERS. SET ALL BUTTON PINS AS AN INPUT //
 
   for (int i = 0; i < size_of_led; i++){
-    led_list[i] = led_button[i][0];
+    size_t n = random(0, size_of_led);
+    led_list[i] = led_button[n][0];
 
     button_list[i] = led_button[i][1];
     pinMode(button_list[i], INPUT);

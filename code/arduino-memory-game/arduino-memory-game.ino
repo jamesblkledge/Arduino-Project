@@ -109,7 +109,8 @@ void setup() {
   Serial.begin(115200);
 
   for (int i = 0; i < size_of_led; i++){
-    led_list[i] = led_button[i][0];
+    size_t n = random(0, size_of_led);
+    led_list[i] = led_button[n][0];
 
     button_list[i] = led_button[i][1];
     pinMode(button_list[i], INPUT);
