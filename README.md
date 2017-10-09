@@ -36,3 +36,274 @@ The game features 4 LEDs on one breadboard and 4 corresponding pushbuttons on a 
 
 Initially, the game may seem very easy to code for, but in reality, it is not. This is because the Arduino does not use standard C++ but a special version with separate libraries. In addition, the LEDs cannot be randomised straight away. Instead, the index of the pin that the LED is attached to is set to a variable. This variable is then placed in a list with the other LED variables. Items from this list are then randomly selected and that order is reassigned to the LEDs.
 
+
+
+## How the code works
+
+### Section one
+```cpp
+int led_list[4];
+int button_list[4];
+int check_list[4];
+
+int flash_rate = 750;
+
+int button_count = 0;
+int cycle_count = 0;
+int flash_count = 0;
+int correct_count = 0;
+
+const size_t size_of_led = sizeof(led_list) / sizeof(led_list[0]);
+const size_t size_of_button = sizeof(button_list) / sizeof(button_list[0]);
+
+```
+
+This is the very first section of code that defines all of the variables that will be used for the game
+Here, the Led lists and Button lists areset to 4 because there willbe four LEDs and 4 buttons.
+The flash rate determines the speed at which the buttons will flash and will later determine the difficulty of the game
+
+The button counts is not the number of buttons but is the number of times a button has been pressed, so this is set to 0
+the cycle count is the number of times that the code has repeated e.g. the number of levels
+the flash count is pretty self explanitory
+and finally the correct count determines how many buttons the user has gotten correct
+
+```cpp
+const int led_button[4][2]{
+
+  {2, 8}, {3, 9}, {4, 10}, {5, 11}
+
+};
+
+```
+
+this is a 2D array that will map each of the LED pins to a corresponding button pin
+The array has 4 sections and each of those sections has 2 items.
+The first item in this list is the button in and the second item is the LED pin.
+
+
+
+```cpp
+int button_state_map[4][3]{
+
+  {8, 0, 0}, {9, 0, 0}, {10, 0, 0}, {11, 0, 0}
+
+};
+```
+similar to how the previous array worked, this array has 4 sections, each of which contains 3 items.
+In this case,the first item is the pin of the button and the next two items determine the last state that the button was in
+
+
+```cpp
+
+int process_button(){
+
+
+  for (int i = 0; i < size_of_button; i++){
+    button_state_map[i][1] = digitalRead(button_state_map[i][0]);
+  }
+
+```
+This piece of code iterates through each button pin and read the state of each of the buttons.
+i is not a variable used for any button but is instead simply an iteration tool used to cycle through each item of an array.
+i is then used to iterate through the button state indexes using the built in digitalRead function that reads the state of pins on the arduino.
+
+```cpp
+ if (button_state_map[0][1] != button_state_map[0][2]){
+    if (button_state_map[0][1] == HIGH){
+      check_list[button_count] = button_state_map[0][0]; button_count++;
+    }
+    delay(50);
+  }
+  button_state_map[0][2] = button_state_map[0][1];
+
+  if (button_state_map[1][1] != button_state_map[1][2]){
+    if (button_state_map[1][1] == HIGH){
+      check_list[button_count] = button_state_map[1][0]; button_count++;
+    }
+    delay(50);
+  }
+  button_state_map[1][2] = button_state_map[1][1];
+
+  if (button_state_map[2][1] != button_state_map[2][2]){
+    if (button_state_map[2][1] == HIGH){
+      check_list[button_count] = button_state_map[2][0]; button_count++;
+    }
+    delay(50);
+  }
+  button_state_map[2][2] = button_state_map[2][1];
+
+  if (button_state_map[3][1] != button_state_map[3][2]){
+    if (button_state_map[3][1] == HIGH){
+      check_list[button_count] = button_state_map[3][0]; button_count++;
+    }
+    delay(50);
+  }
+  button_state_map[3][2] = button_state_map[3][1];
+
+}
+
+```
+This if statement checks to see if 0 != 0 ; takes the [0][1]  (the button state) index from button_state_map and checks to see if it is not equal to button_state_map[0][2] (the last button state). If they are not equal, e.g the button has been pressed, it checks to see if the button state (button_state_map[0][1] is HIGH. If it is, the index (button_count) which starts from zero, is used to identify what position in the check_list array to append the button. E.g if button 2 is pressed first, check_list[0] = 2. button_count++ increments the index so each time it loops around, the index to which elements will be appended to check_list always changes. There is a delay of 50 to prevent pressing multiple buttons at once. the last section of that if tree sets the last button state equal to the current button state. This prevents the idea that when you press a button, it registers as multiple presses.
+This is then repeated for each different button.
+
+
+```cpp
+int shuffle_led_list(){
+
+  for (size_t i = 0; i < size_of_led; i++){
+    size_t j = random(0, size_of_led);
+
+    int k = led_list[i];
+    led_list[i] = led_list[j];
+    led_list[j] = k;
+
+    randomSeed(analogRead(0));
+  }
+
+}
+```
+Again this function iterates through each item in the list. This looks differnet to a normal random function as Arduino does not allow the use of a standard C++ library meaning that the random function cannot be used as per usual. analogRead is another built in function so it does not to be predefined.
+
+```cpp
+void setup() {
+
+  // INITIALISE SERIAL BAUD RATE //
+
+  Serial.begin(9600);
+
+  // POPULATE 'led_list' AND 'button_list' WITH PIN NUMBERS. SET ALL BUTTON PINS AS AN INPUT //
+
+  for (int i = 0; i < size_of_led; i++){
+    led_list[i] = led_button[i][0];
+
+    button_list[i] = led_button[i][1];
+    pinMode(button_list[i], INPUT);
+  }
+
+}
+```
+This is the setup function where all of the "settings" for the program are defined. This for loop iterates through each item _led_list_ and _button_list_ and populates them with the pin numbers of the LEDs and the buttons respectively. At the bottom, the loop also uses the built in pinMode function to set all of the button pins as input as this is how the program will recive data.
+
+
+```cpp
+void loop() {
+
+  while (flash_count == 0){ 
+
+    // CALL THE 'shuffle_led_list' FUNCTION //
+
+    shuffle_led_list();
+
+    // POPULATE 'button_list' WITH PIN NUMBERS, RESPECTIVE TO THE ORDER IN WHICH THE LEDs FLASHED. SET ALL LED PINS AS AN OUTPUT //
+
+    for (int i = 0; i < size_of_button; i++){
+      button_list[i] = led_button[find_index_led(led_button, size_of_led, led_list[i])][1];
+
+      pinMode(led_list[i], OUTPUT);
+    }
+
+    // WAIT 1 SECOND //
+
+    delay(1000);
+```
+This is where the the actual game is stored. The _void loop()_ function is where the most of the actions in an arduino program is stored.
+A while loop is used so that this code only runs where there have been no flashes.
+The function to shuffle the order of the LEDs is then called.
+Theb a for loop cycles through each item in the list _size_of_button_ and populates _buttonlist_ with pin numbers, respective to the order in which the LEDs were pressed.
+The LEDs are then set to be as OUTPUTS in the same way as the buttons were set to INPUTS earlier.
+
+
+
+
+
+```cpp
+
+
+    for (int j = 0; j < size_of_led; j++){
+      digitalWrite(led_list[j], HIGH);
+      delay(flash_rate);
+      digitalWrite(led_list[j], LOW);
+    }
+
+    flash_count++;
+
+  }
+  
+```
+This section of code actually flashes the LEDs in the order that was randomised eariler. This is done by calling the inbuilt _digitalWrite_ function. The word "HIGH" sets the voltage to high turnig the LEDs on.
+  the LEDs are then delayed for a certain amount of time depending on the current difficulty.
+  The LEDs are then turned off in the same way.
+  
+  _flash_count_ is then increases so that the code will only run once.
+  
+  ```cpp
+
+
+  process_button();
+
+  while (button_count == size_of_button){
+  
+    for (int k = 0; k < size_of_button; k++){
+      if (button_list[k] == check_list[k]){
+        cycle_count++;
+      }
+    }
+    ```
+  The _process_button_ is then called.
+  
+  This next section of code checks to see if the indexes of the two lists are the same. If they are then the cycle count will increment.
+  
+```cpp
+ 
+      for (int l = 0; l < 3; l++){
+        digitalWrite(led_button[3][0], HIGH);
+        delay(200);
+        digitalWrite(led_button[3][0], LOW);
+        delay(200);
+      }
+
+      Serial.print("\nFINAL SCORE >> " + String(correct_count)); delay(1000);
+      exit(0);
+    }
+
+    correct_count++;
+    ```
+The top if statement checks to see if the player is worng as the _cycle_count_ is less than the _size_of_button_.
+If they are wrong then the last LED (the red one) will flash 3 times (as indicated in the for loop).
+The _Serial.print_ line then prints out the players final score and then stops the program.
+
+  ```cpp
+
+    for (int m = 0; m < size_of_led; m++){
+      digitalWrite(led_button[m][0], HIGH);
+    }
+
+    Serial.print("CURRENT SCORE >> " + String(correct_count) + "\n"); delay(1000);
+
+    for (int n = 0; n < size_of_led; n++){
+      digitalWrite(led_button[n][0], LOW);
+    }
+  ```
+  This section works in a similar way to the last one exept this time the program is testing to see if the user was correct.
+  If they are, then all of the LEDs will flash at the same time.
+  The current score is displayed on the serial monitor in the same way as last time.
+  
+  ```cpp
+
+    if (correct_count > 1){
+      if (flash_rate > 150 && (correct_count & 1) != 0){
+        flash_rate -= 75;
+      }
+    }
+
+    // RESET KEY VARIABLES //
+
+    button_count -= button_count; cycle_count -= cycle_count; flash_count -= flash_count;
+
+  }
+
+}
+```
+This last section decrements the flash rate by 75 milliseconds as long as the flash rate is above 150. 
+the key variables are then reset for the next cycle of code.
+  
