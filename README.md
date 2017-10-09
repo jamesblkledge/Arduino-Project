@@ -248,7 +248,7 @@ This section of code actually flashes the LEDs in the order that was randomised 
         cycle_count++;
       }
     }
-    ```
+  ```
   The _process_button_ is then called.
   
   This next section of code checks to see if the indexes of the two lists are the same. If they are then the cycle count will increment.
@@ -267,7 +267,7 @@ This section of code actually flashes the LEDs in the order that was randomised 
     }
 
     correct_count++;
-    ```
+```
 The top if statement checks to see if the player is worng as the _cycle_count_ is less than the _size_of_button_.
 If they are wrong then the last LED (the red one) will flash 3 times (as indicated in the for loop).
 The _Serial.print_ line then prints out the players final score and then stops the program.
