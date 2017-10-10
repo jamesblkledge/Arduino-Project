@@ -2,6 +2,8 @@
 
 Arduino Project - Memory Game
 
+[Arduino Memory Game - Video](https://www.youtube.com/watch?v=3k0-VbBb0W4)
+
 In this assignment, we were challenged to create our own tech tutorial of the desired choice of hardware and software. We decided to create a basic memory recall game based off an Arduino Uno. The equipment required for this project was:
 -	4 LEDs (red, yellow, green and purple)
 -	2 breadboards
